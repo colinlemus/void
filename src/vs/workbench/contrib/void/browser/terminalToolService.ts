@@ -31,6 +31,7 @@ export interface ITerminalToolService {
 	focusPersistentTerminal(terminalId: string): Promise<void>
 	persistentTerminalExists(terminalId: string): boolean
 
+	sendKeystroke(terminalId: string, keystroke: string): Promise<void>
 	readTerminal(terminalId: string): Promise<string>
 
 	createPersistentTerminal(opts: { cwd: string | null }): Promise<string>
@@ -204,6 +205,16 @@ export class TerminalToolService extends Disposable implements ITerminalToolServ
 		if (!terminal) return // should never happen
 		this.terminalService.setActiveInstance(terminal)
 		await this.terminalService.focusActiveInstance()
+	}
+
+	sendKeystroke: ITerminalToolService['sendKeystroke'] = async (terminalId, keystroke) => {
+		const terminal = this.getPersistentTerminal(terminalId);
+		if (!terminal) {
+			throw new Error(`Send Keystroke: Terminal with ID ${terminalId} does not exist.`);
+		}
+		
+		// Send the keystroke without executing it (shouldExecute = false)
+		await terminal.sendText(keystroke, false);
 	}
 
 
